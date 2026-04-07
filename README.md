@@ -1,0 +1,1 @@
+In this system, each lighting unit (like LEDs, switches, or sensors) is connected to a CAN bus, allowing them to exchange data efficiently without a central computer. The CAN protocol ensures real-time communication, low wiring complexity, and high fault tolerance.
