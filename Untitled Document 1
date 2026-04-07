@@ -1,0 +1,53 @@
+#include <stdint.h>
+
+// --- Hardware-specific functions (placeholders) ---
+// Replace these with functions from your MCU's specific HAL/library
+void ADC_Init(void);
+uint16_t ADC_Read(uint8_t channel);
+void CAN_Init(void);
+void CAN_SendMessage(uint32_t id, uint8_t* data, uint8_t length);
+void Delay_ms(uint32_t ms);
+
+// --- Definitions ---
+#define LDR_ADC_CHANNEL 0 // Example: ADC Channel 0 (e.g., A0 pin on Arduino)
+#define LIGHT_THRESHOLD 500 // Threshold value to determine day/night (adjust as needed)
+#define CAN_MESSAGE_ID 0x123 // Example CAN ID for light sensor data
+
+// Function to convert LDR value to a status (e.g., 0 for dark, 1 for light)
+uint8_t get_light_status(uint16_t ldr_value) {
+    if (ldr_value < LIGHT_THRESHOLD) {
+        return 0; // Dark
+    } else {
+        return 1; // Light
+    }
+}
+
+int main(void) {
+    // Initialize peripherals
+    ADC_Init();
+    CAN_Init();
+
+    while (1) {
+        // Read the raw analog value from the LDR sensor
+        uint16_t ldr_value = ADC_Read(LDR_ADC_CHANNEL);
+        
+        // Process the value (optional: simple status or raw value)
+        // uint8_t light_status = get_light_status(ldr_value);
+
+        // Prepare data for CAN transmission
+        // Sending raw 16-bit value. Can be sent as two 8-bit bytes.
+        uint8_t can_data[2];
+        can_data[0] = (uint8_t)(ldr_value & 0xFF); // Lower byte
+        can_data[1] = (uint8_t)((ldr_value >> 8) & 0xFF); // Upper byte
+
+        // Transmit data over CAN bus
+        CAN_SendMessage(CAN_MESSAGE_ID, can_data, 2);
+
+        // Optional: Implement the AI/control logic here or on another node
+        // The receiving node would process the 'ldr_value' and control the lights
+
+        // Wait before the next reading
+        Delay_ms(100); 
+    }
+}
+
